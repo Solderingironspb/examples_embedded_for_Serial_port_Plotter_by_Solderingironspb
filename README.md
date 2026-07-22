@@ -10,6 +10,19 @@
 - `Channel_2 (B)` — имитация случайного сигнала с шумом
 
 ---
+## 📂 Библиотека для создания ModbusRTU_slave устройства
+
+- `Lib_ModbusRTU_slave/ModbusRTU_slave`
+
+**Стоит определиться, как Вы будете работать, используя HAL или CMSIS.** 
+
+**В файле "ModbusRTU_slave.h" расскомментируйте нужный макрос:**
+```
+#define MODBUSRTU_USE_HAL //Использовать библиотеку HAL (STM32)
+//#define MODBUSRTU_USE_CMSIS //Использовать библиотеку CMSIS (STM32)
+```
+
+---
 
 ## 📂 Список примеров
 
