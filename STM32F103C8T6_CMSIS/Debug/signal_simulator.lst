@@ -1,0 +1,950 @@
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 1
+
+
+   1              		.cpu cortex-m3
+   2              		.arch armv7-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.file	"signal_simulator.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.global	simulation_interval
+  18              		.section	.data.simulation_interval,"aw"
+  19              		.align	2
+  22              	simulation_interval:
+  23 0000 32000000 		.word	50
+  24              		.global	amplitude_Ch1
+  25              		.section	.data.amplitude_Ch1,"aw"
+  26              		.align	2
+  29              	amplitude_Ch1:
+  30 0000 00000040 		.word	1073741824
+  31              		.global	offsetCh1
+  32              		.section	.data.offsetCh1,"aw"
+  33              		.align	2
+  36              	offsetCh1:
+  37 0000 D00F4940 		.word	1078530000
+  38              		.global	phaseCh1
+  39              		.section	.bss.phaseCh1,"aw",%nobits
+  40              		.align	2
+  43              	phaseCh1:
+  44 0000 00000000 		.space	4
+  45              		.global	speedCh1
+  46              		.section	.rodata.speedCh1,"a"
+  47              		.align	2
+  50              	speedCh1:
+  51 0000 0AD7A33C 		.word	1017370378
+  52              		.global	targetCh2
+  53              		.section	.data.targetCh2,"aw"
+  54              		.align	2
+  57              	targetCh2:
+  58 0000 66661241 		.word	1091724902
+  59              		.global	currentCh2
+  60              		.section	.data.currentCh2,"aw"
+  61              		.align	2
+  64              	currentCh2:
+  65 0000 66661241 		.word	1091724902
+  66              		.global	smoothFactor
+  67              		.section	.rodata.smoothFactor,"a"
+  68              		.align	2
+  71              	smoothFactor:
+  72 0000 0AD7233C 		.word	1008981770
+  73              		.global	minCh2
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 2
+
+
+  74              		.section	.data.minCh2,"aw"
+  75              		.align	2
+  78              	minCh2:
+  79 0000 0000A040 		.word	1084227584
+  80              		.global	maxCh2
+  81              		.section	.data.maxCh2,"aw"
+  82              		.align	2
+  85              	maxCh2:
+  86 0000 00007041 		.word	1097859072
+  87              		.section	.text.init_random,"ax",%progbits
+  88              		.align	1
+  89              		.global	init_random
+  90              		.syntax unified
+  91              		.thumb
+  92              		.thumb_func
+  94              	init_random:
+  95              	.LFB65:
+  96              		.file 1 "Core/Src/signal_simulator.c"
+   1:Core/Src/signal_simulator.c **** /*
+   2:Core/Src/signal_simulator.c ****  * signal_simulator.c
+   3:Core/Src/signal_simulator.c ****  *
+   4:Core/Src/signal_simulator.c ****  *  Created on: 21 июл. 2026 г.
+   5:Core/Src/signal_simulator.c ****  *      Author: Oleg
+   6:Core/Src/signal_simulator.c ****  */
+   7:Core/Src/signal_simulator.c **** 
+   8:Core/Src/signal_simulator.c **** 
+   9:Core/Src/signal_simulator.c **** #include "signal_simulator.h"
+  10:Core/Src/signal_simulator.c **** 
+  11:Core/Src/signal_simulator.c **** extern float Channel_1;
+  12:Core/Src/signal_simulator.c **** extern float Channel_2;
+  13:Core/Src/signal_simulator.c **** 
+  14:Core/Src/signal_simulator.c **** /*===============Симуляция какого-то полезного сигнала, чтоб �
+  15:Core/Src/signal_simulator.c **** // Параметры для симуляции датчиков
+  16:Core/Src/signal_simulator.c **** uint32_t simulation_interval = 50; // Обновление каждые 50 мс
+  17:Core/Src/signal_simulator.c **** 
+  18:Core/Src/signal_simulator.c **** // Параметры для Channel_1 (синусоидальное изменение)
+  19:Core/Src/signal_simulator.c **** float amplitude_Ch1 = 2.0f;     // Амплитуда колебаний
+  20:Core/Src/signal_simulator.c **** float offsetCh1 = 3.14159f;    // Среднее значение
+  21:Core/Src/signal_simulator.c **** float phaseCh1 = 0.0f;
+  22:Core/Src/signal_simulator.c **** const float speedCh1 = 0.02f;  // Скорость изменения
+  23:Core/Src/signal_simulator.c **** 
+  24:Core/Src/signal_simulator.c **** // Параметры для Channel_2 (плавное изменение с шумом)
+  25:Core/Src/signal_simulator.c **** float targetCh2 = 9.15f;
+  26:Core/Src/signal_simulator.c **** float currentCh2 = 9.15f;
+  27:Core/Src/signal_simulator.c **** const float smoothFactor = 0.01f; // Плавность изменения
+  28:Core/Src/signal_simulator.c **** float minCh2 = 5.0f;
+  29:Core/Src/signal_simulator.c **** float maxCh2 = 15.0f;
+  30:Core/Src/signal_simulator.c **** /*===============Симуляция какого-то полезного сигнала, чтоб �
+  31:Core/Src/signal_simulator.c **** 
+  32:Core/Src/signal_simulator.c **** // Инициализация генератора (вызвать один раз при стар�
+  33:Core/Src/signal_simulator.c **** void init_random(void) {
+  97              		.loc 1 33 24
+  98              		.cfi_startproc
+  99              		@ args = 0, pretend = 0, frame = 0
+ 100              		@ frame_needed = 1, uses_anonymous_args = 0
+ 101 0000 80B5     		push	{r7, lr}
+ 102              		.cfi_def_cfa_offset 8
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 3
+
+
+ 103              		.cfi_offset 7, -8
+ 104              		.cfi_offset 14, -4
+ 105 0002 00AF     		add	r7, sp, #0
+ 106              		.cfi_def_cfa_register 7
+  34:Core/Src/signal_simulator.c ****     // Используем таймер как seed для лучшей случайности
+  35:Core/Src/signal_simulator.c ****     srand((uint32_t)&phaseCh1);
+ 107              		.loc 1 35 5
+ 108 0004 024B     		ldr	r3, .L2
+ 109 0006 1846     		mov	r0, r3
+ 110 0008 FFF7FEFF 		bl	srand
+  36:Core/Src/signal_simulator.c **** }
+ 111              		.loc 1 36 1
+ 112 000c 00BF     		nop
+ 113 000e 80BD     		pop	{r7, pc}
+ 114              	.L3:
+ 115              		.align	2
+ 116              	.L2:
+ 117 0010 00000000 		.word	phaseCh1
+ 118              		.cfi_endproc
+ 119              	.LFE65:
+ 121              		.section	.text.random_int,"ax",%progbits
+ 122              		.align	1
+ 123              		.global	random_int
+ 124              		.syntax unified
+ 125              		.thumb
+ 126              		.thumb_func
+ 128              	random_int:
+ 129              	.LFB66:
+  37:Core/Src/signal_simulator.c **** 
+  38:Core/Src/signal_simulator.c **** // Функция-аналог Arduino random(min, max)
+  39:Core/Src/signal_simulator.c **** // Возвращает целое число в диапазоне [min, max-1]
+  40:Core/Src/signal_simulator.c **** int random_int(int min, int max) {
+ 130              		.loc 1 40 34
+ 131              		.cfi_startproc
+ 132              		@ args = 0, pretend = 0, frame = 8
+ 133              		@ frame_needed = 1, uses_anonymous_args = 0
+ 134 0000 80B5     		push	{r7, lr}
+ 135              		.cfi_def_cfa_offset 8
+ 136              		.cfi_offset 7, -8
+ 137              		.cfi_offset 14, -4
+ 138 0002 82B0     		sub	sp, sp, #8
+ 139              		.cfi_def_cfa_offset 16
+ 140 0004 00AF     		add	r7, sp, #0
+ 141              		.cfi_def_cfa_register 7
+ 142 0006 7860     		str	r0, [r7, #4]
+ 143 0008 3960     		str	r1, [r7]
+  41:Core/Src/signal_simulator.c ****     if (min >= max) return min;
+ 144              		.loc 1 41 8
+ 145 000a 7A68     		ldr	r2, [r7, #4]
+ 146 000c 3B68     		ldr	r3, [r7]
+ 147 000e 9A42     		cmp	r2, r3
+ 148 0010 01DB     		blt	.L5
+ 149              		.loc 1 41 28 discriminator 1
+ 150 0012 7B68     		ldr	r3, [r7, #4]
+ 151 0014 0CE0     		b	.L6
+ 152              	.L5:
+  42:Core/Src/signal_simulator.c ****     // Используем деление для получения числа в нужном д�
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 4
+
+
+  43:Core/Src/signal_simulator.c ****     return min + (rand() % (max - min));
+ 153              		.loc 1 43 19
+ 154 0016 FFF7FEFF 		bl	rand
+ 155 001a 0246     		mov	r2, r0
+ 156              		.loc 1 43 33
+ 157 001c 3968     		ldr	r1, [r7]
+ 158 001e 7B68     		ldr	r3, [r7, #4]
+ 159 0020 CB1A     		subs	r3, r1, r3
+ 160              		.loc 1 43 26
+ 161 0022 92FBF3F1 		sdiv	r1, r2, r3
+ 162 0026 01FB03F3 		mul	r3, r1, r3
+ 163 002a D21A     		subs	r2, r2, r3
+ 164              		.loc 1 43 16
+ 165 002c 7B68     		ldr	r3, [r7, #4]
+ 166 002e 1344     		add	r3, r3, r2
+ 167              	.L6:
+  44:Core/Src/signal_simulator.c **** }
+ 168              		.loc 1 44 1
+ 169 0030 1846     		mov	r0, r3
+ 170 0032 0837     		adds	r7, r7, #8
+ 171              		.cfi_def_cfa_offset 8
+ 172 0034 BD46     		mov	sp, r7
+ 173              		.cfi_def_cfa_register 13
+ 174              		@ sp needed
+ 175 0036 80BD     		pop	{r7, pc}
+ 176              		.cfi_endproc
+ 177              	.LFE66:
+ 179              		.section	.text.random_int_max,"ax",%progbits
+ 180              		.align	1
+ 181              		.global	random_int_max
+ 182              		.syntax unified
+ 183              		.thumb
+ 184              		.thumb_func
+ 186              	random_int_max:
+ 187              	.LFB67:
+  45:Core/Src/signal_simulator.c **** 
+  46:Core/Src/signal_simulator.c **** // Функция-аналог Arduino random(max)
+  47:Core/Src/signal_simulator.c **** // Возвращает целое число в диапазоне [0, max-1]
+  48:Core/Src/signal_simulator.c **** int random_int_max(int max) {
+ 188              		.loc 1 48 29
+ 189              		.cfi_startproc
+ 190              		@ args = 0, pretend = 0, frame = 8
+ 191              		@ frame_needed = 1, uses_anonymous_args = 0
+ 192 0000 80B5     		push	{r7, lr}
+ 193              		.cfi_def_cfa_offset 8
+ 194              		.cfi_offset 7, -8
+ 195              		.cfi_offset 14, -4
+ 196 0002 82B0     		sub	sp, sp, #8
+ 197              		.cfi_def_cfa_offset 16
+ 198 0004 00AF     		add	r7, sp, #0
+ 199              		.cfi_def_cfa_register 7
+ 200 0006 7860     		str	r0, [r7, #4]
+  49:Core/Src/signal_simulator.c ****     if (max <= 0) return 0;
+ 201              		.loc 1 49 8
+ 202 0008 7B68     		ldr	r3, [r7, #4]
+ 203 000a 002B     		cmp	r3, #0
+ 204 000c 01DC     		bgt	.L8
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 5
+
+
+ 205              		.loc 1 49 26 discriminator 1
+ 206 000e 0023     		movs	r3, #0
+ 207 0010 09E0     		b	.L9
+ 208              	.L8:
+  50:Core/Src/signal_simulator.c ****     return rand() % max;
+ 209              		.loc 1 50 12
+ 210 0012 FFF7FEFF 		bl	rand
+ 211 0016 0346     		mov	r3, r0
+ 212              		.loc 1 50 19
+ 213 0018 7A68     		ldr	r2, [r7, #4]
+ 214 001a 93FBF2F2 		sdiv	r2, r3, r2
+ 215 001e 7968     		ldr	r1, [r7, #4]
+ 216 0020 01FB02F2 		mul	r2, r1, r2
+ 217 0024 9B1A     		subs	r3, r3, r2
+ 218              	.L9:
+  51:Core/Src/signal_simulator.c **** }
+ 219              		.loc 1 51 1
+ 220 0026 1846     		mov	r0, r3
+ 221 0028 0837     		adds	r7, r7, #8
+ 222              		.cfi_def_cfa_offset 8
+ 223 002a BD46     		mov	sp, r7
+ 224              		.cfi_def_cfa_register 13
+ 225              		@ sp needed
+ 226 002c 80BD     		pop	{r7, pc}
+ 227              		.cfi_endproc
+ 228              	.LFE67:
+ 230              		.global	__aeabi_i2f
+ 231              		.global	__aeabi_fdiv
+ 232              		.section	.text.random_float,"ax",%progbits
+ 233              		.align	1
+ 234              		.global	random_float
+ 235              		.syntax unified
+ 236              		.thumb
+ 237              		.thumb_func
+ 239              	random_float:
+ 240              	.LFB68:
+  52:Core/Src/signal_simulator.c **** 
+  53:Core/Src/signal_simulator.c **** // Функция-аналог Arduino random() для float
+  54:Core/Src/signal_simulator.c **** // Возвращает float в диапазоне [0.0, 1.0)
+  55:Core/Src/signal_simulator.c **** float random_float(void) {
+ 241              		.loc 1 55 26
+ 242              		.cfi_startproc
+ 243              		@ args = 0, pretend = 0, frame = 0
+ 244              		@ frame_needed = 1, uses_anonymous_args = 0
+ 245 0000 80B5     		push	{r7, lr}
+ 246              		.cfi_def_cfa_offset 8
+ 247              		.cfi_offset 7, -8
+ 248              		.cfi_offset 14, -4
+ 249 0002 00AF     		add	r7, sp, #0
+ 250              		.cfi_def_cfa_register 7
+  56:Core/Src/signal_simulator.c ****     return (float)rand() / (RAND_MAX + 1.0f);
+ 251              		.loc 1 56 19
+ 252 0004 FFF7FEFF 		bl	rand
+ 253 0008 0346     		mov	r3, r0
+ 254              		.loc 1 56 12
+ 255 000a 1846     		mov	r0, r3
+ 256 000c FFF7FEFF 		bl	__aeabi_i2f
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 6
+
+
+ 257 0010 0346     		mov	r3, r0
+ 258              		.loc 1 56 26
+ 259 0012 4FF09E41 		mov	r1, #1325400064
+ 260 0016 1846     		mov	r0, r3
+ 261 0018 FFF7FEFF 		bl	__aeabi_fdiv
+ 262 001c 0346     		mov	r3, r0
+  57:Core/Src/signal_simulator.c **** }
+ 263              		.loc 1 57 1
+ 264 001e 1846     		mov	r0, r3
+ 265 0020 80BD     		pop	{r7, pc}
+ 266              		.cfi_endproc
+ 267              	.LFE68:
+ 269              		.global	__aeabi_fsub
+ 270              		.global	__aeabi_fmul
+ 271              		.global	__aeabi_fadd
+ 272              		.section	.text.random_float_range,"ax",%progbits
+ 273              		.align	1
+ 274              		.global	random_float_range
+ 275              		.syntax unified
+ 276              		.thumb
+ 277              		.thumb_func
+ 279              	random_float_range:
+ 280              	.LFB69:
+  58:Core/Src/signal_simulator.c **** 
+  59:Core/Src/signal_simulator.c **** // Функция-аналог Arduino random(min, max) для float
+  60:Core/Src/signal_simulator.c **** // Возвращает float в диапазоне [min, max)
+  61:Core/Src/signal_simulator.c **** float random_float_range(float min, float max) {
+ 281              		.loc 1 61 48
+ 282              		.cfi_startproc
+ 283              		@ args = 0, pretend = 0, frame = 8
+ 284              		@ frame_needed = 1, uses_anonymous_args = 0
+ 285 0000 90B5     		push	{r4, r7, lr}
+ 286              		.cfi_def_cfa_offset 12
+ 287              		.cfi_offset 4, -12
+ 288              		.cfi_offset 7, -8
+ 289              		.cfi_offset 14, -4
+ 290 0002 83B0     		sub	sp, sp, #12
+ 291              		.cfi_def_cfa_offset 24
+ 292 0004 00AF     		add	r7, sp, #0
+ 293              		.cfi_def_cfa_register 7
+ 294 0006 7860     		str	r0, [r7, #4]	@ float
+ 295 0008 3960     		str	r1, [r7]	@ float
+  62:Core/Src/signal_simulator.c ****     return min + random_float() * (max - min);
+ 296              		.loc 1 62 18
+ 297 000a FFF7FEFF 		bl	random_float
+ 298 000e 0446     		mov	r4, r0
+ 299              		.loc 1 62 40
+ 300 0010 7968     		ldr	r1, [r7, #4]	@ float
+ 301 0012 3868     		ldr	r0, [r7]	@ float
+ 302 0014 FFF7FEFF 		bl	__aeabi_fsub
+ 303 0018 0346     		mov	r3, r0
+ 304              		.loc 1 62 33
+ 305 001a 1946     		mov	r1, r3
+ 306 001c 2046     		mov	r0, r4
+ 307 001e FFF7FEFF 		bl	__aeabi_fmul
+ 308 0022 0346     		mov	r3, r0
+ 309              		.loc 1 62 16
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 7
+
+
+ 310 0024 7968     		ldr	r1, [r7, #4]	@ float
+ 311 0026 1846     		mov	r0, r3
+ 312 0028 FFF7FEFF 		bl	__aeabi_fadd
+ 313 002c 0346     		mov	r3, r0
+  63:Core/Src/signal_simulator.c **** }
+ 314              		.loc 1 63 1
+ 315 002e 1846     		mov	r0, r3
+ 316 0030 0C37     		adds	r7, r7, #12
+ 317              		.cfi_def_cfa_offset 12
+ 318 0032 BD46     		mov	sp, r7
+ 319              		.cfi_def_cfa_register 13
+ 320              		@ sp needed
+ 321 0034 90BD     		pop	{r4, r7, pc}
+ 322              		.cfi_endproc
+ 323              	.LFE69:
+ 325              		.global	__aeabi_fcmpgt
+ 326              		.global	__aeabi_fcmplt
+ 327              		.section	.text.Simulation_signal,"ax",%progbits
+ 328              		.align	1
+ 329              		.global	Simulation_signal
+ 330              		.syntax unified
+ 331              		.thumb
+ 332              		.thumb_func
+ 334              	Simulation_signal:
+ 335              	.LFB70:
+  64:Core/Src/signal_simulator.c **** 
+  65:Core/Src/signal_simulator.c **** void Simulation_signal(void) {
+ 336              		.loc 1 65 30
+ 337              		.cfi_startproc
+ 338              		@ args = 0, pretend = 0, frame = 8
+ 339              		@ frame_needed = 1, uses_anonymous_args = 0
+ 340 0000 90B5     		push	{r4, r7, lr}
+ 341              		.cfi_def_cfa_offset 12
+ 342              		.cfi_offset 4, -12
+ 343              		.cfi_offset 7, -8
+ 344              		.cfi_offset 14, -4
+ 345 0002 83B0     		sub	sp, sp, #12
+ 346              		.cfi_def_cfa_offset 24
+ 347 0004 00AF     		add	r7, sp, #0
+ 348              		.cfi_def_cfa_register 7
+  66:Core/Src/signal_simulator.c ****     // Обновляем Channel_1 - плавное синусоидальное изменени�
+  67:Core/Src/signal_simulator.c ****     phaseCh1 += speedCh1;
+ 349              		.loc 1 67 14
+ 350 0006 944B     		ldr	r3, .L37
+ 351 0008 1B68     		ldr	r3, [r3]	@ float
+ 352 000a 944A     		ldr	r2, .L37+4
+ 353 000c 1146     		mov	r1, r2
+ 354 000e 1846     		mov	r0, r3
+ 355 0010 FFF7FEFF 		bl	__aeabi_fadd
+ 356 0014 0346     		mov	r3, r0
+ 357 0016 1A46     		mov	r2, r3
+ 358 0018 8F4B     		ldr	r3, .L37
+ 359 001a 1A60     		str	r2, [r3]	@ float
+  68:Core/Src/signal_simulator.c ****     if (phaseCh1 > 6.28318f)
+ 360              		.loc 1 68 18
+ 361 001c 8E4B     		ldr	r3, .L37
+ 362 001e 1B68     		ldr	r3, [r3]	@ float
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 8
+
+
+ 363              		.loc 1 68 8
+ 364 0020 8F49     		ldr	r1, .L37+8
+ 365 0022 1846     		mov	r0, r3
+ 366 0024 FFF7FEFF 		bl	__aeabi_fcmpgt
+ 367 0028 0346     		mov	r3, r0
+ 368 002a 002B     		cmp	r3, #0
+ 369 002c 09D0     		beq	.L15
+  69:Core/Src/signal_simulator.c ****         phaseCh1 -= 6.28318f;
+ 370              		.loc 1 69 18
+ 371 002e 8A4B     		ldr	r3, .L37
+ 372 0030 1B68     		ldr	r3, [r3]	@ float
+ 373 0032 8B49     		ldr	r1, .L37+8
+ 374 0034 1846     		mov	r0, r3
+ 375 0036 FFF7FEFF 		bl	__aeabi_fsub
+ 376 003a 0346     		mov	r3, r0
+ 377 003c 1A46     		mov	r2, r3
+ 378 003e 864B     		ldr	r3, .L37
+ 379 0040 1A60     		str	r2, [r3]	@ float
+ 380              	.L15:
+  70:Core/Src/signal_simulator.c ****     Channel_1 = offsetCh1 + amplitude_Ch1 * sinf(phaseCh1);
+ 381              		.loc 1 70 45
+ 382 0042 854B     		ldr	r3, .L37
+ 383 0044 1B68     		ldr	r3, [r3]	@ float
+ 384 0046 1846     		mov	r0, r3
+ 385 0048 FFF7FEFF 		bl	sinf
+ 386 004c 0246     		mov	r2, r0
+ 387              		.loc 1 70 43
+ 388 004e 854B     		ldr	r3, .L37+12
+ 389 0050 1B68     		ldr	r3, [r3]	@ float
+ 390 0052 1946     		mov	r1, r3
+ 391 0054 1046     		mov	r0, r2
+ 392 0056 FFF7FEFF 		bl	__aeabi_fmul
+ 393 005a 0346     		mov	r3, r0
+ 394 005c 1A46     		mov	r2, r3
+ 395              		.loc 1 70 27
+ 396 005e 824B     		ldr	r3, .L37+16
+ 397 0060 1B68     		ldr	r3, [r3]	@ float
+ 398 0062 1946     		mov	r1, r3
+ 399 0064 1046     		mov	r0, r2
+ 400 0066 FFF7FEFF 		bl	__aeabi_fadd
+ 401 006a 0346     		mov	r3, r0
+ 402 006c 1A46     		mov	r2, r3
+ 403              		.loc 1 70 15
+ 404 006e 7F4B     		ldr	r3, .L37+20
+ 405 0070 1A60     		str	r2, [r3]	@ float
+  71:Core/Src/signal_simulator.c **** 
+  72:Core/Src/signal_simulator.c ****     // Обновляем Channel_2 - плавное изменение с случайным бл�
+  73:Core/Src/signal_simulator.c ****     // 2% шанс изменения цели
+  74:Core/Src/signal_simulator.c ****     if ((rand() % 100) < 2) {
+ 406              		.loc 1 74 10
+ 407 0072 FFF7FEFF 		bl	rand
+ 408 0076 0246     		mov	r2, r0
+ 409              		.loc 1 74 17
+ 410 0078 7D4B     		ldr	r3, .L37+24
+ 411 007a 83FB0213 		smull	r1, r3, r3, r2
+ 412 007e 5911     		asrs	r1, r3, #5
+ 413 0080 D317     		asrs	r3, r2, #31
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 9
+
+
+ 414 0082 CB1A     		subs	r3, r1, r3
+ 415 0084 6421     		movs	r1, #100
+ 416 0086 01FB03F3 		mul	r3, r1, r3
+ 417 008a D31A     		subs	r3, r2, r3
+ 418              		.loc 1 74 8
+ 419 008c 012B     		cmp	r3, #1
+ 420 008e 30DC     		bgt	.L17
+  75:Core/Src/signal_simulator.c ****         // Новая цель от minCh2 до maxCh2
+  76:Core/Src/signal_simulator.c ****         targetCh2 = minCh2 + ((float)(rand() % 10000) / 10000.0f) * (maxCh2 - minCh2);
+ 421              		.loc 1 76 39
+ 422 0090 FFF7FEFF 		bl	rand
+ 423 0094 0246     		mov	r2, r0
+ 424              		.loc 1 76 46
+ 425 0096 774B     		ldr	r3, .L37+28
+ 426 0098 83FB0213 		smull	r1, r3, r3, r2
+ 427 009c 1913     		asrs	r1, r3, #12
+ 428 009e D317     		asrs	r3, r2, #31
+ 429 00a0 CB1A     		subs	r3, r1, r3
+ 430 00a2 42F21071 		movw	r1, #10000
+ 431 00a6 01FB03F3 		mul	r3, r1, r3
+ 432 00aa D31A     		subs	r3, r2, r3
+ 433              		.loc 1 76 31
+ 434 00ac 1846     		mov	r0, r3
+ 435 00ae FFF7FEFF 		bl	__aeabi_i2f
+ 436 00b2 0346     		mov	r3, r0
+ 437              		.loc 1 76 55
+ 438 00b4 7049     		ldr	r1, .L37+32
+ 439 00b6 1846     		mov	r0, r3
+ 440 00b8 FFF7FEFF 		bl	__aeabi_fdiv
+ 441 00bc 0346     		mov	r3, r0
+ 442 00be 1C46     		mov	r4, r3
+ 443              		.loc 1 76 77
+ 444 00c0 6E4B     		ldr	r3, .L37+36
+ 445 00c2 1B68     		ldr	r3, [r3]	@ float
+ 446 00c4 6E4A     		ldr	r2, .L37+40
+ 447 00c6 1268     		ldr	r2, [r2]	@ float
+ 448 00c8 1146     		mov	r1, r2
+ 449 00ca 1846     		mov	r0, r3
+ 450 00cc FFF7FEFF 		bl	__aeabi_fsub
+ 451 00d0 0346     		mov	r3, r0
+ 452              		.loc 1 76 67
+ 453 00d2 1946     		mov	r1, r3
+ 454 00d4 2046     		mov	r0, r4
+ 455 00d6 FFF7FEFF 		bl	__aeabi_fmul
+ 456 00da 0346     		mov	r3, r0
+ 457 00dc 1A46     		mov	r2, r3
+ 458              		.loc 1 76 28
+ 459 00de 684B     		ldr	r3, .L37+40
+ 460 00e0 1B68     		ldr	r3, [r3]	@ float
+ 461 00e2 1946     		mov	r1, r3
+ 462 00e4 1046     		mov	r0, r2
+ 463 00e6 FFF7FEFF 		bl	__aeabi_fadd
+ 464 00ea 0346     		mov	r3, r0
+ 465 00ec 1A46     		mov	r2, r3
+ 466              		.loc 1 76 19
+ 467 00ee 654B     		ldr	r3, .L37+44
+ 468 00f0 1A60     		str	r2, [r3]	@ float
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 10
+
+
+ 469              	.L17:
+  77:Core/Src/signal_simulator.c ****     }
+  78:Core/Src/signal_simulator.c **** 
+  79:Core/Src/signal_simulator.c ****     // Плавно движемся к целевой точке
+  80:Core/Src/signal_simulator.c ****     if (currentCh2 < targetCh2) {
+ 470              		.loc 1 80 20
+ 471 00f2 654B     		ldr	r3, .L37+48
+ 472 00f4 1B68     		ldr	r3, [r3]	@ float
+ 473 00f6 634A     		ldr	r2, .L37+44
+ 474 00f8 1268     		ldr	r2, [r2]	@ float
+ 475              		.loc 1 80 8
+ 476 00fa 1146     		mov	r1, r2
+ 477 00fc 1846     		mov	r0, r3
+ 478 00fe FFF7FEFF 		bl	__aeabi_fcmplt
+ 479 0102 0346     		mov	r3, r0
+ 480 0104 002B     		cmp	r3, #0
+ 481 0106 2AD0     		beq	.L35
+  81:Core/Src/signal_simulator.c ****         currentCh2 += (targetCh2 - currentCh2) * smoothFactor;
+ 482              		.loc 1 81 34
+ 483 0108 5E4B     		ldr	r3, .L37+44
+ 484 010a 1B68     		ldr	r3, [r3]	@ float
+ 485 010c 5E4A     		ldr	r2, .L37+48
+ 486 010e 1268     		ldr	r2, [r2]	@ float
+ 487 0110 1146     		mov	r1, r2
+ 488 0112 1846     		mov	r0, r3
+ 489 0114 FFF7FEFF 		bl	__aeabi_fsub
+ 490 0118 0346     		mov	r3, r0
+ 491 011a 1A46     		mov	r2, r3
+ 492              		.loc 1 81 48
+ 493 011c 5B4B     		ldr	r3, .L37+52
+ 494 011e 1946     		mov	r1, r3
+ 495 0120 1046     		mov	r0, r2
+ 496 0122 FFF7FEFF 		bl	__aeabi_fmul
+ 497 0126 0346     		mov	r3, r0
+ 498 0128 1A46     		mov	r2, r3
+ 499              		.loc 1 81 20
+ 500 012a 574B     		ldr	r3, .L37+48
+ 501 012c 1B68     		ldr	r3, [r3]	@ float
+ 502 012e 1946     		mov	r1, r3
+ 503 0130 1046     		mov	r0, r2
+ 504 0132 FFF7FEFF 		bl	__aeabi_fadd
+ 505 0136 0346     		mov	r3, r0
+ 506 0138 1A46     		mov	r2, r3
+ 507 013a 534B     		ldr	r3, .L37+48
+ 508 013c 1A60     		str	r2, [r3]	@ float
+  82:Core/Src/signal_simulator.c ****         if (currentCh2 > targetCh2)
+ 509              		.loc 1 82 24
+ 510 013e 524B     		ldr	r3, .L37+48
+ 511 0140 1B68     		ldr	r3, [r3]	@ float
+ 512 0142 504A     		ldr	r2, .L37+44
+ 513 0144 1268     		ldr	r2, [r2]	@ float
+ 514              		.loc 1 82 12
+ 515 0146 1146     		mov	r1, r2
+ 516 0148 1846     		mov	r0, r3
+ 517 014a FFF7FEFF 		bl	__aeabi_fcmpgt
+ 518 014e 0346     		mov	r3, r0
+ 519 0150 002B     		cmp	r3, #0
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 11
+
+
+ 520 0152 38D0     		beq	.L20
+  83:Core/Src/signal_simulator.c ****             currentCh2 = targetCh2;
+ 521              		.loc 1 83 24
+ 522 0154 4B4B     		ldr	r3, .L37+44
+ 523 0156 1B68     		ldr	r3, [r3]	@ float
+ 524 0158 4B4A     		ldr	r2, .L37+48
+ 525 015a 1360     		str	r3, [r2]	@ float
+ 526 015c 33E0     		b	.L20
+ 527              	.L35:
+  84:Core/Src/signal_simulator.c ****     } else if (currentCh2 > targetCh2) {
+ 528              		.loc 1 84 27
+ 529 015e 4A4B     		ldr	r3, .L37+48
+ 530 0160 1B68     		ldr	r3, [r3]	@ float
+ 531 0162 484A     		ldr	r2, .L37+44
+ 532 0164 1268     		ldr	r2, [r2]	@ float
+ 533              		.loc 1 84 15
+ 534 0166 1146     		mov	r1, r2
+ 535 0168 1846     		mov	r0, r3
+ 536 016a FFF7FEFF 		bl	__aeabi_fcmpgt
+ 537 016e 0346     		mov	r3, r0
+ 538 0170 002B     		cmp	r3, #0
+ 539 0172 28D0     		beq	.L20
+  85:Core/Src/signal_simulator.c ****         currentCh2 -= (currentCh2 - targetCh2) * smoothFactor;
+ 540              		.loc 1 85 20
+ 541 0174 444B     		ldr	r3, .L37+48
+ 542 0176 1C68     		ldr	r4, [r3]	@ float
+ 543              		.loc 1 85 35
+ 544 0178 434B     		ldr	r3, .L37+48
+ 545 017a 1B68     		ldr	r3, [r3]	@ float
+ 546 017c 414A     		ldr	r2, .L37+44
+ 547 017e 1268     		ldr	r2, [r2]	@ float
+ 548 0180 1146     		mov	r1, r2
+ 549 0182 1846     		mov	r0, r3
+ 550 0184 FFF7FEFF 		bl	__aeabi_fsub
+ 551 0188 0346     		mov	r3, r0
+ 552 018a 1A46     		mov	r2, r3
+ 553              		.loc 1 85 48
+ 554 018c 3F4B     		ldr	r3, .L37+52
+ 555 018e 1946     		mov	r1, r3
+ 556 0190 1046     		mov	r0, r2
+ 557 0192 FFF7FEFF 		bl	__aeabi_fmul
+ 558 0196 0346     		mov	r3, r0
+ 559              		.loc 1 85 20
+ 560 0198 1946     		mov	r1, r3
+ 561 019a 2046     		mov	r0, r4
+ 562 019c FFF7FEFF 		bl	__aeabi_fsub
+ 563 01a0 0346     		mov	r3, r0
+ 564 01a2 1A46     		mov	r2, r3
+ 565 01a4 384B     		ldr	r3, .L37+48
+ 566 01a6 1A60     		str	r2, [r3]	@ float
+  86:Core/Src/signal_simulator.c ****         if (currentCh2 < targetCh2)
+ 567              		.loc 1 86 24
+ 568 01a8 374B     		ldr	r3, .L37+48
+ 569 01aa 1B68     		ldr	r3, [r3]	@ float
+ 570 01ac 354A     		ldr	r2, .L37+44
+ 571 01ae 1268     		ldr	r2, [r2]	@ float
+ 572              		.loc 1 86 12
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 12
+
+
+ 573 01b0 1146     		mov	r1, r2
+ 574 01b2 1846     		mov	r0, r3
+ 575 01b4 FFF7FEFF 		bl	__aeabi_fcmplt
+ 576 01b8 0346     		mov	r3, r0
+ 577 01ba 002B     		cmp	r3, #0
+ 578 01bc 03D0     		beq	.L20
+  87:Core/Src/signal_simulator.c ****             currentCh2 = targetCh2;
+ 579              		.loc 1 87 24
+ 580 01be 314B     		ldr	r3, .L37+44
+ 581 01c0 1B68     		ldr	r3, [r3]	@ float
+ 582 01c2 314A     		ldr	r2, .L37+48
+ 583 01c4 1360     		str	r3, [r2]	@ float
+ 584              	.L20:
+  88:Core/Src/signal_simulator.c ****     }
+  89:Core/Src/signal_simulator.c **** 
+  90:Core/Src/signal_simulator.c ****     // Добавляем небольшие естественные колебания
+  91:Core/Src/signal_simulator.c ****     float noise = ((float)(rand() % 100) - 50.0f) / 500.0f;
+ 585              		.loc 1 91 28
+ 586 01c6 FFF7FEFF 		bl	rand
+ 587 01ca 0246     		mov	r2, r0
+ 588              		.loc 1 91 35
+ 589 01cc 284B     		ldr	r3, .L37+24
+ 590 01ce 83FB0213 		smull	r1, r3, r3, r2
+ 591 01d2 5911     		asrs	r1, r3, #5
+ 592 01d4 D317     		asrs	r3, r2, #31
+ 593 01d6 CB1A     		subs	r3, r1, r3
+ 594 01d8 6421     		movs	r1, #100
+ 595 01da 01FB03F3 		mul	r3, r1, r3
+ 596 01de D31A     		subs	r3, r2, r3
+ 597              		.loc 1 91 20
+ 598 01e0 1846     		mov	r0, r3
+ 599 01e2 FFF7FEFF 		bl	__aeabi_i2f
+ 600 01e6 0346     		mov	r3, r0
+ 601              		.loc 1 91 42
+ 602 01e8 2949     		ldr	r1, .L37+56
+ 603 01ea 1846     		mov	r0, r3
+ 604 01ec FFF7FEFF 		bl	__aeabi_fsub
+ 605 01f0 0346     		mov	r3, r0
+ 606              		.loc 1 91 11
+ 607 01f2 2849     		ldr	r1, .L37+60
+ 608 01f4 1846     		mov	r0, r3
+ 609 01f6 FFF7FEFF 		bl	__aeabi_fdiv
+ 610 01fa 0346     		mov	r3, r0
+ 611 01fc 7B60     		str	r3, [r7, #4]	@ float
+  92:Core/Src/signal_simulator.c ****     Channel_2 = currentCh2 + noise;
+ 612              		.loc 1 92 28
+ 613 01fe 224B     		ldr	r3, .L37+48
+ 614 0200 1B68     		ldr	r3, [r3]	@ float
+ 615 0202 7968     		ldr	r1, [r7, #4]	@ float
+ 616 0204 1846     		mov	r0, r3
+ 617 0206 FFF7FEFF 		bl	__aeabi_fadd
+ 618 020a 0346     		mov	r3, r0
+ 619 020c 1A46     		mov	r2, r3
+ 620              		.loc 1 92 15
+ 621 020e 224B     		ldr	r3, .L37+64
+ 622 0210 1A60     		str	r2, [r3]	@ float
+  93:Core/Src/signal_simulator.c **** 
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 13
+
+
+  94:Core/Src/signal_simulator.c ****     // Ограничиваем Channel_2 в разумных пределах
+  95:Core/Src/signal_simulator.c ****     if (Channel_2 < minCh2) Channel_2 = minCh2;
+ 623              		.loc 1 95 19
+ 624 0212 214B     		ldr	r3, .L37+64
+ 625 0214 1B68     		ldr	r3, [r3]	@ float
+ 626 0216 1A4A     		ldr	r2, .L37+40
+ 627 0218 1268     		ldr	r2, [r2]	@ float
+ 628              		.loc 1 95 8
+ 629 021a 1146     		mov	r1, r2
+ 630 021c 1846     		mov	r0, r3
+ 631 021e FFF7FEFF 		bl	__aeabi_fcmplt
+ 632 0222 0346     		mov	r3, r0
+ 633 0224 002B     		cmp	r3, #0
+ 634 0226 03D0     		beq	.L24
+ 635              		.loc 1 95 39 discriminator 1
+ 636 0228 154B     		ldr	r3, .L37+40
+ 637 022a 1B68     		ldr	r3, [r3]	@ float
+ 638 022c 1A4A     		ldr	r2, .L37+64
+ 639 022e 1360     		str	r3, [r2]	@ float
+ 640              	.L24:
+  96:Core/Src/signal_simulator.c ****     if (Channel_2 > maxCh2) Channel_2 = maxCh2;
+ 641              		.loc 1 96 19
+ 642 0230 194B     		ldr	r3, .L37+64
+ 643 0232 1B68     		ldr	r3, [r3]	@ float
+ 644 0234 114A     		ldr	r2, .L37+36
+ 645 0236 1268     		ldr	r2, [r2]	@ float
+ 646              		.loc 1 96 8
+ 647 0238 1146     		mov	r1, r2
+ 648 023a 1846     		mov	r0, r3
+ 649 023c FFF7FEFF 		bl	__aeabi_fcmpgt
+ 650 0240 0346     		mov	r3, r0
+ 651 0242 002B     		cmp	r3, #0
+ 652 0244 00D1     		bne	.L34
+  97:Core/Src/signal_simulator.c **** }
+ 653              		.loc 1 97 1
+ 654 0246 03E0     		b	.L36
+ 655              	.L34:
+  96:Core/Src/signal_simulator.c ****     if (Channel_2 > maxCh2) Channel_2 = maxCh2;
+ 656              		.loc 1 96 39 discriminator 1
+ 657 0248 0C4B     		ldr	r3, .L37+36
+ 658 024a 1B68     		ldr	r3, [r3]	@ float
+ 659 024c 124A     		ldr	r2, .L37+64
+ 660 024e 1360     		str	r3, [r2]	@ float
+ 661              	.L36:
+ 662              		.loc 1 97 1
+ 663 0250 00BF     		nop
+ 664 0252 0C37     		adds	r7, r7, #12
+ 665              		.cfi_def_cfa_offset 12
+ 666 0254 BD46     		mov	sp, r7
+ 667              		.cfi_def_cfa_register 13
+ 668              		@ sp needed
+ 669 0256 90BD     		pop	{r4, r7, pc}
+ 670              	.L38:
+ 671              		.align	2
+ 672              	.L37:
+ 673 0258 00000000 		.word	phaseCh1
+ 674 025c 0AD7A33C 		.word	1017370378
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 14
+
+
+ 675 0260 D00FC940 		.word	1086918608
+ 676 0264 00000000 		.word	amplitude_Ch1
+ 677 0268 00000000 		.word	offsetCh1
+ 678 026c 00000000 		.word	Channel_1
+ 679 0270 1F85EB51 		.word	1374389535
+ 680 0274 AD8BDB68 		.word	1759218605
+ 681 0278 00401C46 		.word	1176256512
+ 682 027c 00000000 		.word	maxCh2
+ 683 0280 00000000 		.word	minCh2
+ 684 0284 00000000 		.word	targetCh2
+ 685 0288 00000000 		.word	currentCh2
+ 686 028c 0AD7233C 		.word	1008981770
+ 687 0290 00004842 		.word	1112014848
+ 688 0294 0000FA43 		.word	1140457472
+ 689 0298 00000000 		.word	Channel_2
+ 690              		.cfi_endproc
+ 691              	.LFE70:
+ 693              		.section	.text.simulation_signal_init,"ax",%progbits
+ 694              		.align	1
+ 695              		.global	simulation_signal_init
+ 696              		.syntax unified
+ 697              		.thumb
+ 698              		.thumb_func
+ 700              	simulation_signal_init:
+ 701              	.LFB71:
+  98:Core/Src/signal_simulator.c **** 
+  99:Core/Src/signal_simulator.c **** void simulation_signal_init(void){
+ 702              		.loc 1 99 34
+ 703              		.cfi_startproc
+ 704              		@ args = 0, pretend = 0, frame = 0
+ 705              		@ frame_needed = 1, uses_anonymous_args = 0
+ 706 0000 80B5     		push	{r7, lr}
+ 707              		.cfi_def_cfa_offset 8
+ 708              		.cfi_offset 7, -8
+ 709              		.cfi_offset 14, -4
+ 710 0002 00AF     		add	r7, sp, #0
+ 711              		.cfi_def_cfa_register 7
+ 100:Core/Src/signal_simulator.c **** 	// Инициализируем начальные значения
+ 101:Core/Src/signal_simulator.c **** 	Channel_1 = offsetCh1;
+ 712              		.loc 1 101 12
+ 713 0004 054B     		ldr	r3, .L40
+ 714 0006 1B68     		ldr	r3, [r3]	@ float
+ 715 0008 054A     		ldr	r2, .L40+4
+ 716 000a 1360     		str	r3, [r2]	@ float
+ 102:Core/Src/signal_simulator.c **** 	Channel_2 = currentCh2;
+ 717              		.loc 1 102 12
+ 718 000c 054B     		ldr	r3, .L40+8
+ 719 000e 1B68     		ldr	r3, [r3]	@ float
+ 720 0010 054A     		ldr	r2, .L40+12
+ 721 0012 1360     		str	r3, [r2]	@ float
+ 103:Core/Src/signal_simulator.c **** 	init_random();
+ 722              		.loc 1 103 2
+ 723 0014 FFF7FEFF 		bl	init_random
+ 104:Core/Src/signal_simulator.c **** }
+ 724              		.loc 1 104 1
+ 725 0018 00BF     		nop
+ 726 001a 80BD     		pop	{r7, pc}
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 15
+
+
+ 727              	.L41:
+ 728              		.align	2
+ 729              	.L40:
+ 730 001c 00000000 		.word	offsetCh1
+ 731 0020 00000000 		.word	Channel_1
+ 732 0024 00000000 		.word	currentCh2
+ 733 0028 00000000 		.word	Channel_2
+ 734              		.cfi_endproc
+ 735              	.LFE71:
+ 737              		.text
+ 738              	.Letext0:
+ 739              		.file 2 "c:\\dev_tools\\stm32_tools\\gnu-tools-for-stm32.12.3\\tools\\arm-none-eabi\\include\\mach
+ 740              		.file 3 "c:\\dev_tools\\stm32_tools\\gnu-tools-for-stm32.12.3\\tools\\arm-none-eabi\\include\\sys\
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 16
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 signal_simulator.c
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:22     .data.simulation_interval:00000000 simulation_interval
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:19     .data.simulation_interval:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:29     .data.amplitude_Ch1:00000000 amplitude_Ch1
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:26     .data.amplitude_Ch1:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:36     .data.offsetCh1:00000000 offsetCh1
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:33     .data.offsetCh1:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:43     .bss.phaseCh1:00000000 phaseCh1
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:40     .bss.phaseCh1:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:50     .rodata.speedCh1:00000000 speedCh1
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:47     .rodata.speedCh1:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:57     .data.targetCh2:00000000 targetCh2
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:54     .data.targetCh2:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:64     .data.currentCh2:00000000 currentCh2
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:61     .data.currentCh2:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:71     .rodata.smoothFactor:00000000 smoothFactor
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:68     .rodata.smoothFactor:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:78     .data.minCh2:00000000 minCh2
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:75     .data.minCh2:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:85     .data.maxCh2:00000000 maxCh2
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:82     .data.maxCh2:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:88     .text.init_random:00000000 $t
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:94     .text.init_random:00000000 init_random
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:117    .text.init_random:00000010 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:122    .text.random_int:00000000 $t
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:128    .text.random_int:00000000 random_int
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:180    .text.random_int_max:00000000 $t
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:186    .text.random_int_max:00000000 random_int_max
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:233    .text.random_float:00000000 $t
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:239    .text.random_float:00000000 random_float
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:273    .text.random_float_range:00000000 $t
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:279    .text.random_float_range:00000000 random_float_range
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:328    .text.Simulation_signal:00000000 $t
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:334    .text.Simulation_signal:00000000 Simulation_signal
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:673    .text.Simulation_signal:00000258 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:694    .text.simulation_signal_init:00000000 $t
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:700    .text.simulation_signal_init:00000000 simulation_signal_init
+C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s:730    .text.simulation_signal_init:0000001c $d
+                           .group:00000000 wm4.0.57948b105342b2a9a91afe6dac72b4ef
+                           .group:00000000 wm4.stm32f1xx.h.39.208bb8a61c892b7c37d899c49a031330
+                           .group:00000000 wm4.stm32f103xb.h.38.ec967d5ad9d3269cb0788eebda048e38
+                           .group:00000000 wm4._newlib_version.h.4.bfdf54b0af045d4a71376ae00f63a22c
+                           .group:00000000 wm4.features.h.33.318b64d71e0957639cfb30f1db1f7ec8
+                           .group:00000000 wm4._default_types.h.15.247e5cd201eca3442cbf5404108c4935
+                           .group:00000000 wm4._intsup.h.10.48bafbb683905c4daa4565a85aeeb264
+                           .group:00000000 wm4._stdint.h.10.c24fa3af3bc1706662bb5593a907e841
+                           .group:00000000 wm4.stdint.h.23.d53047a68f4a85177f80b422d52785ed
+                           .group:00000000 wm4.cmsis_version.h.32.4d5822004c01a829a975260e854b5f8e
+                           .group:00000000 wm4.core_cm3.h.66.fc46cac19810db8f98d67da7ef88f42c
+                           .group:00000000 wm4.cmsis_gcc.h.26.4f5798e999d5690b80e6ded3ecc94b37
+                           .group:00000000 wm4.core_cm3.h.127.f4474120f1a7524deb56f9d74ff175da
+                           .group:00000000 wm4.stm32f103xb.h.573.10249aa7473ca93be896fed94046a725
+                           .group:00000000 wm4.stm32f1xx.h.162.96b09079a093c34dbd7f0b85cbd0ddee
+                           .group:00000000 wm4.stdbool.h.29.07dce69c3b78884144b7f7bd19483461
+                           .group:00000000 wm4.newlib.h.8.4679f89e52c9f69cd44f3a27cd28c759
+                           .group:00000000 wm4.ieeefp.h.77.25247dc27dbe3b23bfe98c2dc18f6ac5
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\ccoenoy8.s 			page 17
+
+
+                           .group:00000000 wm4.config.h.224.79362c3cdb280fe0b8d95bd0bc4d5c54
+                           .group:00000000 wm4._ansi.h.31.de524f58584151836e90d8620a16f8e8
+                           .group:00000000 wm4.stddef.h.39.144cf5ddcd53cbfdac30259dc1a6c87f
+                           .group:00000000 wm4._types.h.20.dd0d04dca3800a0d2a6129b87f3adbb2
+                           .group:00000000 wm4.stddef.h.155.3588ebfdd1e8c7ede80509bb9c3b8009
+                           .group:00000000 wm4._types.h.127.34941de1b2539d59d5cac00e0dd27a45
+                           .group:00000000 wm4.reent.h.17.e292bf8b0bec6c96e131a54347145a30
+                           .group:00000000 wm4.lock.h.2.1461d1fff82dffe8bfddc23307f6484f
+                           .group:00000000 wm4.reent.h.77.32fd7d280fc2a40b0797abce5beaf6e3
+                           .group:00000000 wm4.assert.h.11.db24e541f16414db224bf986d21017e2
+                           .group:00000000 wm4.reent.h.504.40d20ade344680fbcb6a0178bf7ae09e
+                           .group:00000000 wm4.cdefs.h.49.39045112216f6a021dbdffe3bf5accce
+                           .group:00000000 wm4.math.h.13.4f4c30988c5d76b6bf30dd7e2791b7c6
+                           .group:00000000 wm4.stdlib.h.13.4ed386f5c1a80d71e72172885d946ef2
+                           .group:00000000 wm4.stddef.h.155.ba788add86a0e365f264484f110c3c29
+                           .group:00000000 wm4.alloca.h.8.dfc0c703c47ec3e69746825b17d9e66d
+                           .group:00000000 wm4.stdlib.h.56.f4862cfbf4363a1db01842d5bdf72c18
+
+UNDEFINED SYMBOLS
+srand
+rand
+__aeabi_i2f
+__aeabi_fdiv
+__aeabi_fsub
+__aeabi_fmul
+__aeabi_fadd
+__aeabi_fcmpgt
+__aeabi_fcmplt
+sinf
+Channel_1
+Channel_2

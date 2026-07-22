@@ -1,0 +1,30 @@
+#include <stdint.h>
+#include "ModbusRTU.h"
+
+//Структура адресов
+enum {
+	MODBUSRTU_SLAVE_CHANNEL_1_H_REG,
+	MODBUSRTU_SLAVE_CHANNEL_1_L_REG,
+	MODBUSRTU_SLAVE_CHANNEL_2_H_REG,
+	MODBUSRTU_SLAVE_CHANNEL_2_L_REG,
+	MODBUSRTU_SLAVE_CHANNEL_3_H_REG,
+	MODBUSRTU_SLAVE_CHANNEL_3_L_REG,
+	MODBUSRTU_SLAVE_CHANNEL_4_H_REG,
+	MODBUSRTU_SLAVE_CHANNEL_4_L_REG,
+	MODBUSRTU_SLAVE_CHANNEL_5_H_REG,
+	MODBUSRTU_SLAVE_CHANNEL_5_L_REG,
+	MODBUSRTU_SLAVE_CHANNEL_6_H_REG,
+	MODBUSRTU_SLAVE_CHANNEL_6_L_REG,
+	MODBUSRTU_SLAVE_CHANNEL_7_H_REG,
+	MODBUSRTU_SLAVE_CHANNEL_7_L_REG,
+	MODBUSRTU_SLAVE_CHANNEL_8_H_REG,
+	MODBUSRTU_SLAVE_CHANNEL_8_L_REG,
+};
+
+#define MODBUSRTU_SLAVE_ENUM_QUANTITY 16	//Количество адресов, сколько мы записали в enum
+
+void ModbusRTU_slave_Run(void);
+void ModbusRTU_slave_set_data(uint8_t num_reg, float data);
+uint32_t calculateTimeout(uint32_t baudRate);
+void ModbusRTU_run(void);
+void ModbusRTU_slave_reset(void);

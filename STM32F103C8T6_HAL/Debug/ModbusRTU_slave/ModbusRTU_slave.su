@@ -1,0 +1,12 @@
+ModbusRTU_slave.c:47:10:ModbusRTU_CRC16_Calculate	24	static
+ModbusRTU_slave.c:75:6:ModbusRTU_slave_Run	32	static
+ModbusRTU_slave.c:105:6:ModbusRTU_fast_Embedded_send_data	24	static
+ModbusRTU_slave.c:121:6:ModbusRTU_Send_to_MEM	24	static
+ModbusRTU_slave.c:138:7:ModbusRTU_GetData_Float	24	static
+ModbusRTU_slave.c:152:10:ModbusRTU_GetData_U32	24	static
+ModbusRTU_slave.c:166:9:ModbusRTU_GetData_I32	24	static
+ModbusRTU_slave.c:180:10:ModbusRTU_GetData_U16	24	static
+ModbusRTU_slave.c:194:9:ModbusRTU_GetData_I16	24	static
+ModbusRTU_slave.c:207:6:ModbusRTU_0x03_data_processing	24	static
+ModbusRTU_slave.c:244:6:ModbusRTU_0x06_data_processing	24	static
+ModbusRTU_slave.c:296:6:ModbusRTU_0x10_data_processing	24	static

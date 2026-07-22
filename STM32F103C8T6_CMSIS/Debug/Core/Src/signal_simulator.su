@@ -1,0 +1,7 @@
+signal_simulator.c:33:6:init_random	8	static
+signal_simulator.c:40:5:random_int	16	static
+signal_simulator.c:48:5:random_int_max	16	static
+signal_simulator.c:55:7:random_float	8	static
+signal_simulator.c:61:7:random_float_range	24	static
+signal_simulator.c:65:6:Simulation_signal	24	static
+signal_simulator.c:99:6:simulation_signal_init	8	static

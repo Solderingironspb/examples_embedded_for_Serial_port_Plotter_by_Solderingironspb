@@ -1,0 +1,8 @@
+"./Core/Src/main.o"
+"./Core/Src/signal_simulator.o"
+"./Core/Src/stm32f103xx_CMSIS.o"
+"./Core/Src/syscalls.o"
+"./Core/Src/sysmem.o"
+"./Core/Src/system_stm32f1xx.o"
+"./Core/Startup/startup_stm32f103c8tx.o"
+"./ModbusRTU_slave/ModbusRTU_slave.o"

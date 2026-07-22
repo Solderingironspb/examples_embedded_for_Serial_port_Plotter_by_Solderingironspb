@@ -1,0 +1,390 @@
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s 			page 1
+
+
+   1              		.cpu cortex-m3
+   2              		.arch armv7-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.file	"main.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.global	Channel_1
+  18              		.section	.bss.Channel_1,"aw",%nobits
+  19              		.align	2
+  22              	Channel_1:
+  23 0000 00000000 		.space	4
+  24              		.global	Channel_2
+  25              		.section	.bss.Channel_2,"aw",%nobits
+  26              		.align	2
+  29              	Channel_2:
+  30 0000 00000000 		.space	4
+  31              		.global	Channel_3
+  32              		.section	.bss.Channel_3,"aw",%nobits
+  33              		.align	2
+  36              	Channel_3:
+  37 0000 00000000 		.space	4
+  38              		.global	Channel_4
+  39              		.section	.bss.Channel_4,"aw",%nobits
+  40              		.align	2
+  43              	Channel_4:
+  44 0000 00000000 		.space	4
+  45              		.global	Channel_5
+  46              		.section	.bss.Channel_5,"aw",%nobits
+  47              		.align	2
+  50              	Channel_5:
+  51 0000 00000000 		.space	4
+  52              		.global	Channel_6
+  53              		.section	.bss.Channel_6,"aw",%nobits
+  54              		.align	2
+  57              	Channel_6:
+  58 0000 00000000 		.space	4
+  59              		.global	Channel_7
+  60              		.section	.bss.Channel_7,"aw",%nobits
+  61              		.align	2
+  64              	Channel_7:
+  65 0000 00000000 		.space	4
+  66              		.global	Channel_8
+  67              		.section	.bss.Channel_8,"aw",%nobits
+  68              		.align	2
+  71              	Channel_8:
+  72 0000 00000000 		.space	4
+  73              		.section	.text.USART1_IRQHandler,"ax",%progbits
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s 			page 2
+
+
+  74              		.align	1
+  75              		.global	USART1_IRQHandler
+  76              		.syntax unified
+  77              		.thumb
+  78              		.thumb_func
+  80              	USART1_IRQHandler:
+  81              	.LFB65:
+  82              		.file 1 "Core/Src/main.c"
+   1:Core/Src/main.c **** #include <ModbusRTU_slave.h>
+   2:Core/Src/main.c **** #include "main.h"
+   3:Core/Src/main.c **** #include "signal_simulator.h"
+   4:Core/Src/main.c **** 
+   5:Core/Src/main.c **** extern struct USART_name husart1; //Объявляем структуру по USART.
+   6:Core/Src/main.c **** extern bool ModbusRTU_Data_recieved; //Флаг принятых данных и готовых к 
+   7:Core/Src/main.c **** extern uint16_t ModbusRTU_Slave_MEM[MODBUSRTU_SLAVE_ENUM_QUANTITY]; //Память устройст
+   8:Core/Src/main.c **** 
+   9:Core/Src/main.c **** extern uint32_t simulation_interval; // Обновление каждые 50 мс
+  10:Core/Src/main.c **** 
+  11:Core/Src/main.c **** float Channel_1 = 0;
+  12:Core/Src/main.c **** float Channel_2 = 0;
+  13:Core/Src/main.c **** float Channel_3 = 0;
+  14:Core/Src/main.c **** float Channel_4 = 0;
+  15:Core/Src/main.c **** float Channel_5 = 0;
+  16:Core/Src/main.c **** float Channel_6 = 0;
+  17:Core/Src/main.c **** float Channel_7 = 0;
+  18:Core/Src/main.c **** float Channel_8 = 0;
+  19:Core/Src/main.c **** 
+  20:Core/Src/main.c **** void USART1_IRQHandler(void) {
+  83              		.loc 1 20 30
+  84              		.cfi_startproc
+  85              		@ args = 0, pretend = 0, frame = 0
+  86              		@ frame_needed = 1, uses_anonymous_args = 0
+  87              		@ link register save eliminated.
+  88 0000 80B4     		push	{r7}
+  89              		.cfi_def_cfa_offset 4
+  90              		.cfi_offset 7, -4
+  91 0002 00AF     		add	r7, sp, #0
+  92              		.cfi_def_cfa_register 7
+  21:Core/Src/main.c **** 	if (READ_BIT(USART1->SR, USART_SR_RXNE)) {
+  93              		.loc 1 21 6
+  94 0004 154B     		ldr	r3, .L5
+  95 0006 1B68     		ldr	r3, [r3]
+  96 0008 03F02003 		and	r3, r3, #32
+  97              		.loc 1 21 5
+  98 000c 002B     		cmp	r3, #0
+  99 000e 0ED0     		beq	.L2
+  22:Core/Src/main.c **** 		husart1.rx_buffer[husart1.rx_counter] = USART1->DR;
+ 100              		.loc 1 22 49
+ 101 0010 124B     		ldr	r3, .L5
+ 102 0012 5A68     		ldr	r2, [r3, #4]
+ 103              		.loc 1 22 28
+ 104 0014 124B     		ldr	r3, .L5+4
+ 105 0016 1B8D     		ldrh	r3, [r3, #40]
+ 106 0018 1946     		mov	r1, r3
+ 107              		.loc 1 22 41
+ 108 001a D2B2     		uxtb	r2, r2
+ 109 001c 104B     		ldr	r3, .L5+4
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s 			page 3
+
+
+ 110 001e 0B44     		add	r3, r3, r1
+ 111 0020 1A75     		strb	r2, [r3, #20]
+  23:Core/Src/main.c **** 		husart1.rx_counter++;
+ 112              		.loc 1 23 10
+ 113 0022 0F4B     		ldr	r3, .L5+4
+ 114 0024 1B8D     		ldrh	r3, [r3, #40]
+ 115              		.loc 1 23 21
+ 116 0026 0133     		adds	r3, r3, #1
+ 117 0028 9AB2     		uxth	r2, r3
+ 118 002a 0D4B     		ldr	r3, .L5+4
+ 119 002c 1A85     		strh	r2, [r3, #40]	@ movhi
+ 120              	.L2:
+  24:Core/Src/main.c **** 	}
+  25:Core/Src/main.c **** 	if (READ_BIT(USART1->SR, USART_SR_IDLE)) {
+ 121              		.loc 1 25 6
+ 122 002e 0B4B     		ldr	r3, .L5
+ 123 0030 1B68     		ldr	r3, [r3]
+ 124 0032 03F01003 		and	r3, r3, #16
+ 125              		.loc 1 25 5
+ 126 0036 002B     		cmp	r3, #0
+ 127 0038 0BD0     		beq	.L4
+  26:Core/Src/main.c **** 		USART1->DR;
+ 128              		.loc 1 26 9
+ 129 003a 084B     		ldr	r3, .L5
+ 130 003c 5B68     		ldr	r3, [r3, #4]
+  27:Core/Src/main.c **** 		husart1.rx_len = husart1.rx_counter;
+ 131              		.loc 1 27 27
+ 132 003e 084B     		ldr	r3, .L5+4
+ 133 0040 1A8D     		ldrh	r2, [r3, #40]
+ 134              		.loc 1 27 18
+ 135 0042 074B     		ldr	r3, .L5+4
+ 136 0044 5A85     		strh	r2, [r3, #42]	@ movhi
+  28:Core/Src/main.c **** 		husart1.rx_counter = 0;
+ 137              		.loc 1 28 22
+ 138 0046 064B     		ldr	r3, .L5+4
+ 139 0048 0022     		movs	r2, #0
+ 140 004a 1A85     		strh	r2, [r3, #40]	@ movhi
+  29:Core/Src/main.c **** 		ModbusRTU_Data_recieved = true;
+ 141              		.loc 1 29 27
+ 142 004c 054B     		ldr	r3, .L5+8
+ 143 004e 0122     		movs	r2, #1
+ 144 0050 1A70     		strb	r2, [r3]
+ 145              	.L4:
+  30:Core/Src/main.c **** 
+  31:Core/Src/main.c **** 	}
+  32:Core/Src/main.c **** }
+ 146              		.loc 1 32 1
+ 147 0052 00BF     		nop
+ 148 0054 BD46     		mov	sp, r7
+ 149              		.cfi_def_cfa_register 13
+ 150              		@ sp needed
+ 151 0056 80BC     		pop	{r7}
+ 152              		.cfi_restore 7
+ 153              		.cfi_def_cfa_offset 0
+ 154 0058 7047     		bx	lr
+ 155              	.L6:
+ 156 005a 00BF     		.align	2
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s 			page 4
+
+
+ 157              	.L5:
+ 158 005c 00380140 		.word	1073821696
+ 159 0060 00000000 		.word	husart1
+ 160 0064 00000000 		.word	ModbusRTU_Data_recieved
+ 161              		.cfi_endproc
+ 162              	.LFE65:
+ 164              		.section	.text.main,"ax",%progbits
+ 165              		.align	1
+ 166              		.global	main
+ 167              		.syntax unified
+ 168              		.thumb
+ 169              		.thumb_func
+ 171              	main:
+ 172              	.LFB66:
+  33:Core/Src/main.c **** 
+  34:Core/Src/main.c **** int main(void) {
+ 173              		.loc 1 34 16
+ 174              		.cfi_startproc
+ 175              		@ args = 0, pretend = 0, frame = 0
+ 176              		@ frame_needed = 1, uses_anonymous_args = 0
+ 177 0000 80B5     		push	{r7, lr}
+ 178              		.cfi_def_cfa_offset 8
+ 179              		.cfi_offset 7, -8
+ 180              		.cfi_offset 14, -4
+ 181 0002 00AF     		add	r7, sp, #0
+ 182              		.cfi_def_cfa_register 7
+  35:Core/Src/main.c **** 	CMSIS_Debug_init();
+ 183              		.loc 1 35 2
+ 184 0004 FFF7FEFF 		bl	CMSIS_Debug_init
+  36:Core/Src/main.c **** 	CMSIS_RCC_SystemClock_72MHz();
+ 185              		.loc 1 36 2
+ 186 0008 FFF7FEFF 		bl	CMSIS_RCC_SystemClock_72MHz
+  37:Core/Src/main.c **** 	CMSIS_SysTick_Timer_init();
+ 187              		.loc 1 37 2
+ 188 000c FFF7FEFF 		bl	CMSIS_SysTick_Timer_init
+  38:Core/Src/main.c **** 	CMSIS_USART1_Init();
+ 189              		.loc 1 38 2
+ 190 0010 FFF7FEFF 		bl	CMSIS_USART1_Init
+  39:Core/Src/main.c **** 
+  40:Core/Src/main.c **** 	simulation_signal_init();
+ 191              		.loc 1 40 2
+ 192 0014 FFF7FEFF 		bl	simulation_signal_init
+ 193              	.L10:
+  41:Core/Src/main.c **** 
+  42:Core/Src/main.c **** 	while (1) {
+  43:Core/Src/main.c **** 
+  44:Core/Src/main.c **** 		//Если данные пришли
+  45:Core/Src/main.c **** 		if (ModbusRTU_Data_recieved) {
+ 194              		.loc 1 45 7
+ 195 0018 124B     		ldr	r3, .L11
+ 196 001a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 197              		.loc 1 45 6
+ 198 001c 002B     		cmp	r3, #0
+ 199 001e 0AD0     		beq	.L8
+  46:Core/Src/main.c **** 			ModbusRTU_slave_Run(husart1.rx_buffer, husart1.rx_len, husart1.tx_buffer); //Обработае�
+ 200              		.loc 1 46 50
+ 201 0020 114B     		ldr	r3, .L11+4
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s 			page 5
+
+
+ 202 0022 5B8D     		ldrh	r3, [r3, #42]
+ 203              		.loc 1 46 4
+ 204 0024 DBB2     		uxtb	r3, r3
+ 205 0026 104A     		ldr	r2, .L11+4
+ 206 0028 1946     		mov	r1, r3
+ 207 002a 1048     		ldr	r0, .L11+8
+ 208 002c FFF7FEFF 		bl	ModbusRTU_slave_Run
+  47:Core/Src/main.c **** 			ModbusRTU_Data_recieved = false; //Ждем следующий запрос
+ 209              		.loc 1 47 28
+ 210 0030 0C4B     		ldr	r3, .L11
+ 211 0032 0022     		movs	r2, #0
+ 212 0034 1A70     		strb	r2, [r3]
+ 213              	.L8:
+  48:Core/Src/main.c **** 		}
+  49:Core/Src/main.c **** 
+  50:Core/Src/main.c **** 		if (simulation_interval == 0) {
+ 214              		.loc 1 50 27
+ 215 0036 0E4B     		ldr	r3, .L11+12
+ 216 0038 1B68     		ldr	r3, [r3]
+ 217              		.loc 1 50 6
+ 218 003a 002B     		cmp	r3, #0
+ 219 003c ECD1     		bne	.L10
+  51:Core/Src/main.c **** 			Simulation_signal();
+ 220              		.loc 1 51 4
+ 221 003e FFF7FEFF 		bl	Simulation_signal
+  52:Core/Src/main.c **** 			ModbusRTU_fast_Embedded_send_data(Channel_1, MODBUSRTU_SLAVE_CHANNEL_1_H_REG);
+ 222              		.loc 1 52 4
+ 223 0042 0C4B     		ldr	r3, .L11+16
+ 224 0044 1B68     		ldr	r3, [r3]	@ float
+ 225 0046 0021     		movs	r1, #0
+ 226 0048 1846     		mov	r0, r3
+ 227 004a FFF7FEFF 		bl	ModbusRTU_fast_Embedded_send_data
+  53:Core/Src/main.c **** 			ModbusRTU_fast_Embedded_send_data(Channel_2, MODBUSRTU_SLAVE_CHANNEL_2_H_REG);
+ 228              		.loc 1 53 4
+ 229 004e 0A4B     		ldr	r3, .L11+20
+ 230 0050 1B68     		ldr	r3, [r3]	@ float
+ 231 0052 0221     		movs	r1, #2
+ 232 0054 1846     		mov	r0, r3
+ 233 0056 FFF7FEFF 		bl	ModbusRTU_fast_Embedded_send_data
+  54:Core/Src/main.c **** 			simulation_interval = 50;
+ 234              		.loc 1 54 24
+ 235 005a 054B     		ldr	r3, .L11+12
+ 236 005c 3222     		movs	r2, #50
+ 237 005e 1A60     		str	r2, [r3]
+  45:Core/Src/main.c **** 			ModbusRTU_slave_Run(husart1.rx_buffer, husart1.rx_len, husart1.tx_buffer); //Обработае�
+ 238              		.loc 1 45 6
+ 239 0060 DAE7     		b	.L10
+ 240              	.L12:
+ 241 0062 00BF     		.align	2
+ 242              	.L11:
+ 243 0064 00000000 		.word	ModbusRTU_Data_recieved
+ 244 0068 00000000 		.word	husart1
+ 245 006c 14000000 		.word	husart1+20
+ 246 0070 00000000 		.word	simulation_interval
+ 247 0074 00000000 		.word	Channel_1
+ 248 0078 00000000 		.word	Channel_2
+ 249              		.cfi_endproc
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s 			page 6
+
+
+ 250              	.LFE66:
+ 252              		.text
+ 253              	.Letext0:
+ 254              		.file 2 "c:\\dev_tools\\stm32_tools\\gnu-tools-for-stm32.12.3\\tools\\arm-none-eabi\\include\\mach
+ 255              		.file 3 "c:\\dev_tools\\stm32_tools\\gnu-tools-for-stm32.12.3\\tools\\arm-none-eabi\\include\\sys\
+ 256              		.file 4 "Drivers/CMSIS/stm32f103xb.h"
+ 257              		.file 5 "Core/Inc/stm32f103xx_CMSIS.h"
+ 258              		.file 6 "ModbusRTU_slave/ModbusRTU_slave.h"
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s 			page 7
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 main.c
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:22     .bss.Channel_1:00000000 Channel_1
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:19     .bss.Channel_1:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:29     .bss.Channel_2:00000000 Channel_2
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:26     .bss.Channel_2:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:36     .bss.Channel_3:00000000 Channel_3
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:33     .bss.Channel_3:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:43     .bss.Channel_4:00000000 Channel_4
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:40     .bss.Channel_4:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:50     .bss.Channel_5:00000000 Channel_5
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:47     .bss.Channel_5:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:57     .bss.Channel_6:00000000 Channel_6
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:54     .bss.Channel_6:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:64     .bss.Channel_7:00000000 Channel_7
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:61     .bss.Channel_7:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:71     .bss.Channel_8:00000000 Channel_8
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:68     .bss.Channel_8:00000000 $d
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:74     .text.USART1_IRQHandler:00000000 $t
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:80     .text.USART1_IRQHandler:00000000 USART1_IRQHandler
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:158    .text.USART1_IRQHandler:0000005c $d
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:165    .text.main:00000000 $t
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:171    .text.main:00000000 main
+C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s:243    .text.main:00000064 $d
+                           .group:00000000 wm4.0.57948b105342b2a9a91afe6dac72b4ef
+                           .group:00000000 wm4.stm32f1xx.h.39.208bb8a61c892b7c37d899c49a031330
+                           .group:00000000 wm4.stm32f103xb.h.38.ec967d5ad9d3269cb0788eebda048e38
+                           .group:00000000 wm4._newlib_version.h.4.bfdf54b0af045d4a71376ae00f63a22c
+                           .group:00000000 wm4.features.h.33.318b64d71e0957639cfb30f1db1f7ec8
+                           .group:00000000 wm4._default_types.h.15.247e5cd201eca3442cbf5404108c4935
+                           .group:00000000 wm4._intsup.h.10.48bafbb683905c4daa4565a85aeeb264
+                           .group:00000000 wm4._stdint.h.10.c24fa3af3bc1706662bb5593a907e841
+                           .group:00000000 wm4.stdint.h.23.d53047a68f4a85177f80b422d52785ed
+                           .group:00000000 wm4.cmsis_version.h.32.4d5822004c01a829a975260e854b5f8e
+                           .group:00000000 wm4.core_cm3.h.66.fc46cac19810db8f98d67da7ef88f42c
+                           .group:00000000 wm4.cmsis_gcc.h.26.4f5798e999d5690b80e6ded3ecc94b37
+                           .group:00000000 wm4.core_cm3.h.127.f4474120f1a7524deb56f9d74ff175da
+                           .group:00000000 wm4.stm32f103xb.h.573.10249aa7473ca93be896fed94046a725
+                           .group:00000000 wm4.stm32f1xx.h.162.96b09079a093c34dbd7f0b85cbd0ddee
+                           .group:00000000 wm4.stdbool.h.29.07dce69c3b78884144b7f7bd19483461
+                           .group:00000000 wm4.ModbusRTU_slave.h.14.df1cbe0d70103eae15479fb89327c443
+                           .group:00000000 wm4.newlib.h.8.4679f89e52c9f69cd44f3a27cd28c759
+                           .group:00000000 wm4.ieeefp.h.77.25247dc27dbe3b23bfe98c2dc18f6ac5
+                           .group:00000000 wm4.config.h.224.79362c3cdb280fe0b8d95bd0bc4d5c54
+                           .group:00000000 wm4._ansi.h.31.de524f58584151836e90d8620a16f8e8
+                           .group:00000000 wm4.stddef.h.39.144cf5ddcd53cbfdac30259dc1a6c87f
+                           .group:00000000 wm4._types.h.20.dd0d04dca3800a0d2a6129b87f3adbb2
+                           .group:00000000 wm4.stddef.h.155.3588ebfdd1e8c7ede80509bb9c3b8009
+                           .group:00000000 wm4._types.h.127.34941de1b2539d59d5cac00e0dd27a45
+                           .group:00000000 wm4.reent.h.17.e292bf8b0bec6c96e131a54347145a30
+                           .group:00000000 wm4.lock.h.2.1461d1fff82dffe8bfddc23307f6484f
+                           .group:00000000 wm4.reent.h.77.32fd7d280fc2a40b0797abce5beaf6e3
+                           .group:00000000 wm4.assert.h.11.db24e541f16414db224bf986d21017e2
+                           .group:00000000 wm4.reent.h.504.40d20ade344680fbcb6a0178bf7ae09e
+                           .group:00000000 wm4.cdefs.h.49.39045112216f6a021dbdffe3bf5accce
+                           .group:00000000 wm4.math.h.13.4f4c30988c5d76b6bf30dd7e2791b7c6
+                           .group:00000000 wm4.stdlib.h.13.4ed386f5c1a80d71e72172885d946ef2
+ARM GAS  C:\Users\SOLDER~1\AppData\Local\Temp\cc8L0UcR.s 			page 8
+
+
+                           .group:00000000 wm4.stddef.h.155.ba788add86a0e365f264484f110c3c29
+                           .group:00000000 wm4.alloca.h.8.dfc0c703c47ec3e69746825b17d9e66d
+                           .group:00000000 wm4.stdlib.h.56.f4862cfbf4363a1db01842d5bdf72c18
+
+UNDEFINED SYMBOLS
+husart1
+ModbusRTU_Data_recieved
+CMSIS_Debug_init
+CMSIS_RCC_SystemClock_72MHz
+CMSIS_SysTick_Timer_init
+CMSIS_USART1_Init
+simulation_signal_init
+ModbusRTU_slave_Run
+Simulation_signal
+ModbusRTU_fast_Embedded_send_data
+simulation_interval
