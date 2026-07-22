@@ -101,16 +101,52 @@ if (ModbusRTU_Data_recieved) {
 ---
 ## В репозитории собраны готовые примеры проектов для микроконтроллеров, которые работают с **Serial Port Plotter 2.0** через UART.
 
-На данный момент реализовано **3 примера**. В каждом из них создаются два канала:
+На данный момент реализовано **3 синтетических примера и 1 с датчиком температуры и влажности**. 
+
+В синтетике создаются два канала:
 - `Channel_1 (A)` — имитация синусоидального сигнала
 - `Channel_2 (B)` — имитация случайного сигнала с шумом
-
 ---
 
-## 📂 Список примеров
+## 📂 Список синтетических примеров
 
 - `Arduino_nano/ModbusRTU_Embedded` — пример для Arduino Nano
 - `STM32F103C8T6_CMSIS` — пример для STM32F103C8T6 (CMSIS)
 - `STM32F103C8T6_HAL` — пример для STM32F103C8T6 (библиотека HAL)
+
+---
+
+ ## 🔥Пример на основе датчика температуры и влажности HDC1080 (`STM32F411CEU6_HAL_HDC1080`)
+ ### Описание:
+```
+/*
+ * Мы используем I2C датчик температуры и влажности HDC1080
+ * Сделаем вид, что PC13 - это реле, указывающее на аварийную ситуацию
+ * Реле будет включаться при превышении климатических условий: Температура 30°C, Влажность 65%
+ * И пусть у нас будет счетчик включений реле.
+ * Наша задача - вывести это все на график и произвести анализ данных.
+ */
+Микроконтроллер STM32F411CEU6. Библиотека HAL
+UART 115200 8 n 1
+Ножки микроконтроллера(файл Подключения.png):
+PA9 - UART TX
+PA10 - UART RX
+PB6 - I2C1 SCL
+PB7 - I2C1 SDA
+PC13 - светодиод на плате (выход на реле, при аварии)
+
+Файл проекта для программы ModbusPoll: Mbpoll1.mbp
+Скриншот программы во время записи: Screenshot.png
+Файл записи данных: STM32F411CEU6_HAL_Example_22.07.2026.dat
+Файл преобразованной записи в *.csv таблицу: STM32F411CEU6_HAL_Example_22.07.2026.csv
+Файл анализа в Excel: Анализ показаний.xlsx
+```
+
+<img width="769" height="615" alt="Подключения" src="https://github.com/user-attachments/assets/daef87db-58be-4e41-bbcf-700beec751c7" />
+<img width="1441" height="936" alt="Screenshot" src="https://github.com/user-attachments/assets/76d77cf1-96e7-482c-9c84-20eaab742f13" />
+<img width="1246" height="756" alt="image" src="https://github.com/user-attachments/assets/4e24c1ee-3c13-4a80-92f2-11fdad723ece" />
+
+### Весь код смотрите в проекте STM32F411CEU6_HAL_HDC1080: https://github.com/Solderingironspb/examples_embedded_for_Serial_port_Plotter_by_Solderingironspb/tree/main/STM32F411CEU6_HAL_HDC1080
+
 
 ---
